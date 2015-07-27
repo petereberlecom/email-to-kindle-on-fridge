@@ -24,6 +24,8 @@ def fetch_last_email
   end
 end
 
+set :port, 1212
+
 get '/email' do
   fetch_last_email
   
