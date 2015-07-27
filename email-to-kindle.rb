@@ -15,8 +15,8 @@ def fetch_last_email
   end
    
   $last_email_uid = email.uid
-  $sender = email.sender.first.name
-  $subject = email.subject
+  $sender = Mail::Encodings.value_decode email.sender.first.name
+  $subject = Mail::Encodings.value_decode email.subject
   $received_at = email.envelope.date
   $image = nil
   if email.attachments.size > 0
