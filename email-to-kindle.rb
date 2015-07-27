@@ -6,15 +6,15 @@ require 'base64'
 gmail_login = ARGV[0]
 gmail_password = ARGV[1]
 $gmail = Gmail.new gmail_login, gmail_password
-$currently_displayed_email_uid = nil
+$last_email_uid = nil
 
 def fetch_last_email
   email = $gmail.inbox.emails.last
-  if email.uid == $currently_displayed_email_uid
+  if email.uid == $last_email_uid
     return
   end
    
-  $currently_displayed_email_uid = email.uid
+  $last_email_uid = email.uid
   $sender = email.sender.first.name
   $subject = email.subject
   $received_at = email.envelope.date
@@ -26,22 +26,75 @@ end
 
 set :port, 1212
 
+get '/should_we_reload' do
+  fetch_last_email
+  (params['rendered_email_uid'].to_i == $last_email_uid) ? 'no' : 'yes'
+end
+
 get '/email' do
   fetch_last_email
   
 <<STRING
 <html>
-  <head>
-    <meta http-equiv="refresh" content="10" />
-  </head>
   <body>
     <p><b>#{$sender}</b>, #{$received_at}</p>
     <h1>#{$subject}</h1>
     <img src="data:image/jpg;base64,#{Base64.encode64($image) if $image}" style="width:100%;">
+
+    <script>
+        function ajaxGetRequest(url, callback) { // https://gist.github.com/iwek/5599777
+          var xhr;
+
+          if(typeof XMLHttpRequest !== 'undefined') xhr = new XMLHttpRequest();
+          else {
+            var versions = ["MSXML2.XmlHttp.5.0", 
+                "MSXML2.XmlHttp.4.0",
+                "MSXML2.XmlHttp.3.0", 
+                "MSXML2.XmlHttp.2.0",
+                "Microsoft.XmlHttp"]
+
+            for(var i = 0, len = versions.length; i < len; i++) {
+            try {
+              xhr = new ActiveXObject(versions[i]);
+              break;
+            }
+              catch(e){}
+            } // end for
+          }
+
+          xhr.onreadystatechange = ensureReadiness;
+
+          function ensureReadiness() {
+            if(xhr.readyState < 4) {
+              return;
+            }
+
+            if(xhr.status !== 200) {
+              return;
+            }
+
+            // all is well	
+            if(xhr.readyState === 4) {
+              callback(xhr);
+            }			
+          }
+
+          xhr.open('GET', url, true);
+          xhr.send('');
+        }
+
+        lastEmailChangedCheck = function(){
+          ajaxGetRequest('should_we_reload?rendered_email_uid=#{$last_email_uid}', function(xhr) {	
+            if(xhr.responseText == 'yes')
+                location.reload();
+          });
+          setTimeout(lastEmailChangedCheck, 5000);
+        }
+
+        lastEmailChangedCheck();
+
+    </script>
   </body>
 </html>
 STRING
 end
-
-
-#gmail.logout
