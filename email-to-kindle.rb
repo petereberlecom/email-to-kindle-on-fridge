@@ -10,18 +10,23 @@ $gmail = Gmail.new gmail_login, gmail_password
 $last_email_uid = nil
 
 def fetch_last_email
-  email = $gmail.inbox.emails.last
-  if email.uid == $last_email_uid
-    return
-  end
+  begin
+    email = $gmail.inbox.emails.last
+    if email.uid == $last_email_uid
+      return
+    end
    
-  $last_email_uid = email.uid
-  $sender = Mail::Encodings.value_decode email.sender.first.name
-  $subject = Mail::Encodings.value_decode email.subject
-  $received_at = email.envelope.date
-  $image = nil
-  if email.attachments.size > 0 && email.attachments.first.size < MAX_IMAGE_SIZE_IN_BYTES
-    $image = email.attachments.first.decoded
+    $last_email_uid = email.uid
+    $sender = Mail::Encodings.value_decode email.sender.first.name
+    $subject = Mail::Encodings.value_decode email.subject
+    $received_at = email.envelope.date
+    $image = nil
+    if email.attachments.size > 0 && email.attachments.first.size < MAX_IMAGE_SIZE_IN_BYTES
+      $image = email.attachments.first.decoded
+    end
+    
+  rescue OpenSSL::SSL::SSLError
+    exit 1
   end
 end
 
@@ -35,7 +40,7 @@ end
 get '/email' do
   fetch_last_email
   
-<<STRING
+  <<STRING
 <html>
   <body>
     <p><b>#{$sender}</b>, #{$received_at}</p>
