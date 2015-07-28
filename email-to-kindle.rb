@@ -3,6 +3,7 @@ require 'gmail'
 require 'sinatra'
 require 'base64'
 
+MAX_IMAGE_SIZE_IN_BYTES = 600000
 gmail_login = ARGV[0]
 gmail_password = ARGV[1]
 $gmail = Gmail.new gmail_login, gmail_password
@@ -19,7 +20,7 @@ def fetch_last_email
   $subject = Mail::Encodings.value_decode email.subject
   $received_at = email.envelope.date
   $image = nil
-  if email.attachments.size > 0
+  if email.attachments.size > 0 && email.attachments.first.size < MAX_IMAGE_SIZE_IN_BYTES
     $image = email.attachments.first.decoded
   end
 end
