@@ -11,7 +11,7 @@ $last_email_uid = nil
 def fetch_last_email
   begin
     email = $gmail.inbox.emails.last
-  rescue OpenSSL::SSL::SSLError # error handling when connection is lost
+  rescue # error handling when connection is lost
     begin
       $gmail.logout
     ensure
