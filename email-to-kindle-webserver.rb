@@ -9,32 +9,22 @@ $gmail = Gmail.new gmail_login, gmail_password
 $last_email_uid = nil
 
 def fetch_last_email
-  begin
-    email = $gmail.inbox.emails.last
-    if email.uid == $last_email_uid
-      return
-    end
+  email = $gmail.inbox.emails.last
+  if email.uid == $last_email_uid
+    return
+  end
    
-    $last_email_uid = email.uid
-    $sender = Mail::Encodings.value_decode email.sender.first.name
-    $subject = Mail::Encodings.value_decode email.subject
-    $received_at = email.envelope.date
-    $image = nil
-    if email.attachments.size > 0 
-      $image = email.attachments.first.decoded
-    end
-    
-  rescue OpenSSL::SSL::SSLError
-    exit 1
+  $last_email_uid = email.uid
+  $sender = Mail::Encodings.value_decode email.sender.first.name
+  $subject = Mail::Encodings.value_decode email.subject
+  $received_at = email.envelope.date
+  $image = nil
+  if email.attachments.size > 0 
+    $image = email.attachments.first.decoded
   end
 end
 
 set :port, 1212
-
-get '/should_we_reload' do
-  fetch_last_email
-  (params['rendered_email_uid'].to_i == $last_email_uid) ? 'no' : 'yes'
-end
 
 get '/email' do
   fetch_last_email
@@ -93,7 +83,7 @@ get '/email' do
             if(xhr.responseText == 'yes')
                 location.reload();
           });
-          setTimeout(lastEmailChangedCheck, 5000);
+          setTimeout(lastEmailChangedCheck, 10000);
         }
 
         lastEmailChangedCheck();
@@ -102,4 +92,9 @@ get '/email' do
   </body>
 </html>
 STRING
+end
+
+get '/should_we_reload' do
+  fetch_last_email
+  (params['rendered_email_uid'].to_i == $last_email_uid) ? 'no' : 'yes'
 end
