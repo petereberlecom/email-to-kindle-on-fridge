@@ -3,13 +3,23 @@ require 'gmail'
 require 'sinatra'
 require 'base64'
 
-gmail_login = ARGV[0]
-gmail_password = ARGV[1]
-$gmail = Gmail.new gmail_login, gmail_password
+$gmail_login = ARGV[0]
+$gmail_password = ARGV[1]
+$gmail = Gmail.new $gmail_login, $gmail_password
 $last_email_uid = nil
 
 def fetch_last_email
-  email = $gmail.inbox.emails.last
+  begin
+    email = $gmail.inbox.emails.last
+  rescue OpenSSL::SSL::SSLError # error handling when connection is lost
+    begin
+      $gmail.logout
+    ensure
+      $gmail = Gmail.new $gmail_login, $gmail_password
+      email = $gmail.inbox.emails.last    
+    end
+  end
+  
   if email.uid == $last_email_uid
     return
   end
