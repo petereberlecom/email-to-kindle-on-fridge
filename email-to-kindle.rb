@@ -41,7 +41,7 @@ get '/email' do
   
   <<STRING
 <html>
-  <body>
+  <body style="overflow:hidden;">
     <p><b>#{$sender}</b>, #{$received_at}</p>
     <h1>#{$subject}</h1>
     <img src="data:image/jpg;base64,#{Base64.encode64($image) if $image}" style="width:100%;">
