@@ -41,9 +41,15 @@ get '/email' do
   
   <<STRING
 <html>
+  <head>
+<style>
+body {font-family: sans}
+p {padding-top: 0; paddding-bottom: 0; margin-top: 0; margin-bottom: 0;}
+</style>
+</head>
   <body>
-    <p><b>#{$sender}</b>, #{$received_at}</p>
-    <h1>#{$subject}</h1>
+    <p  style="font-size: 200%"><b>#{$sender}</b>, #{$received_at}</p>
+    <p style="font-size: 400%">#{$subject}</p>
     <img src="data:image/jpg;base64,#{Base64.encode64($image) if $image}" style="width:100%;">
 
     <script>
