@@ -30,8 +30,18 @@ def fetch_last_email
   $received_at = email.envelope.date
   $image = nil
   if email.attachments.size > 0 
-    $image = email.attachments.first.decoded
+    $image = convert_and_resize email.attachments.first.decoded
   end
+end
+
+ORIGINAL_IMAGE_PATH = '/tmp/email-to-kindle.original.jpg'
+RESIZED_IMAGE_PATH = '/tmp/email-to-kindle.resized.jpg'
+
+def convert_and_resize blob
+  File.open(ORIGINAL_IMAGE_PATH, 'wb'){|f| f.write blob}
+  cmd = "convert #{ORIGINAL_IMAGE_PATH} -resize 1024x1024 #{RESIZED_IMAGE_PATH}"
+  `#{cmd}`
+  File.read RESIZED_IMAGE_PATH
 end
 
 set :port, 1212
