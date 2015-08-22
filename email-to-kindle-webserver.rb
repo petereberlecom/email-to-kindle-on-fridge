@@ -35,6 +35,7 @@ def fetch_last_email
 end
 
 set :port, 1212
+set :bind, '0.0.0.0'
 
 get '/email' do
   fetch_last_email
