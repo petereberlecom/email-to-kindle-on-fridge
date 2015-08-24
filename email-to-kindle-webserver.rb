@@ -39,7 +39,7 @@ RESIZED_IMAGE_PATH = '/tmp/email-to-kindle.resized.jpg'
 
 def convert_and_resize blob
   File.open(ORIGINAL_IMAGE_PATH, 'wb'){|f| f.write blob}
-  cmd = "convert #{ORIGINAL_IMAGE_PATH} -resize 1024x1024 #{RESIZED_IMAGE_PATH}"
+  cmd = "convert #{ORIGINAL_IMAGE_PATH} -resize 1024x1024 -auto-orient #{RESIZED_IMAGE_PATH}"
   `#{cmd}`
   File.read RESIZED_IMAGE_PATH
 end
