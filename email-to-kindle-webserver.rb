@@ -45,6 +45,7 @@ def convert_and_resize blob
 end
 
 set :port, 1212
+set :bind, '0.0.0.0'
 
 get '/email' do
   fetch_last_email
